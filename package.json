@@ -1,14 +1,15 @@
 {
-  "name": "crich-heroes-overlay",
+  "name": "cricheroes-overlay",
   "version": "1.0.0",
-  "description": "Transparent live cricket overlay (CricHeroes scrape)",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "node-fetch": "^2.6.12"
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2"
   }
 }
