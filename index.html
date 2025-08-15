@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Overlay</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="overlay">
+    <div class="bar">
+      <!-- Left panel: Batsmen -->
+      <div class="panel p-l" id="left">
+        <div>
+          <div class="title" id="bat1">Batter 1 0(0)</div>
+          <div class="title" id="bat2">Batter 2 0(0)</div>
+        </div>
+      </div>
+
+      <!-- Middle: RR / Score / Overs -->
+      <div class="panel">
+        <div class="title">RR</div>
+        <div class="score" id="score">0-0 (0.0)</div>
+        <div class="title right">CRR: <span id="crr">0.00</span></div>
+      </div>
+
+      <!-- Bowler -->
+      <div class="panel">
+        <div class="title">LM</div>
+        <div class="title" id="bowler">Bowler 0-0 (0)</div>
+      </div>
+
+      <!-- Recent balls -->
+      <div class="panel">
+        <div class="balls" id="recentBalls">
+          <div class="ball">.</div>
+          <div class="ball">.</div>
+          <div class="ball">.</div>
+          <div class="ball">.</div>
+          <div class="ball">.</div>
+          <div class="ball">.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function classifyBall(sym){
+      if(!sym) return "";
+      if(sym.toUpperCase() === "W") return "wicket";
+      if(sym === "." || sym === "•") return "";
+      // anything 1-6 treated as run
+      if(/^[1-6]$/.test(sym)) return "run";
+      return "";
+    }
+
+    async function pull(){
+      try{
+        const r = await fetch('/api/score');
+        const j = await r.json();
+        if(!j.ok) return;
+
+        const data = j.data;
+
+        // Batsmen
+        document.getElementById('bat1').textContent = data.batsmen[0] || "Batter 1 0(0)";
+        document.getElementById('bat2').textContent = data.batsmen[1] || "Batter 2 0(0)";
+
+        // Score & CRR
+        document.getElementById('score').textContent = data.score || "0-0 (0.0)";
+        document.getElementById('crr').textContent = data.crr || "0.00";
+
+        // Bowler
+        document.getElementById('bowler').textContent = data.bowler || "Bowler 0-0 (0)";
+
+        // Recent balls
+        const rb = document.getElementById('recentBalls');
+        rb.innerHTML = "";
+        (data.balls || []).slice(0,6).forEach(sym => {
+          const d = document.createElement('div');
+          d.className = 'ball';
+          const cls = classifyBall(sym);
+          if (cls) d.classList.add(cls);
+          d.textContent = sym === "." ? "" : sym;
+          rb.appendChild(d);
+        });
+      }catch(e){
+        // ignore fetch errors silently for overlay stability
+      }
+    }
+
+    setInterval(pull, 3000);
+    pull();
+  </script>
+</body>
+</html>
